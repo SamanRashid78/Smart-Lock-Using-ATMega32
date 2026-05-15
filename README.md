@@ -1,10 +1,6 @@
-# smart-lock-atmega32
+# Smart-Lock-Using-ATmega32
 
 Password-based digital door lock implemented in AVR Assembly on the ATmega32 microcontroller.
-
-**Course:** Microprocessor Programming and Interfacing — EL-3002  
-**Institution:** FAST-NUCES, Karachi  
-**Authors:** Muzna Kamal (23K-6002), Eshaal Ali, Saman Rashid
 
 ---
 
@@ -34,7 +30,7 @@ The user enters a 3-digit password via a 4×4 matrix keypad. Each keypress is ec
 
 ## Password
 
-Default password is `A C D` (hardcoded in `CHECK_PASS`). To change it, edit the three `CPI` comparisons in `src/main.asm`:
+Default password is `A C D` (hardcoded in `CHECK_PASS`). To change it, edit the three `CPI` comparisons in `main.asm`:
 
 ```asm
 CPI R16, 'A'   ; 1st digit
@@ -42,7 +38,7 @@ CPI R16, 'C'   ; 2nd digit
 CPI R16, 'D'   ; 3rd digit
 ```
 
-> **Note:** Password is stored in plain SRAM with no encryption — suitable for academic use only.
+> **Note:** Password is stored in plain SRAM with no encryption (suitable for academic use only).
 
 ## Building & Flashing
 
