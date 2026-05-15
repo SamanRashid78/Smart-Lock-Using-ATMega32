@@ -1,4 +1,4 @@
-# Smart-Lock-Using-ATmega32
+# Smart Lock Using ATmega32
 
 Password-based digital door lock implemented in AVR Assembly on the ATmega32 microcontroller.
 
