@@ -1,0 +1,36 @@
+# Compiled output
+*.hex
+*.elf
+*.o
+*.obj
+*.map
+*.lss
+*.sym
+
+# AVR Studio / Microchip Studio
+*.aps
+*.aws
+*.cof
+*.eep
+*.componentinfo.xml
+Debug/
+Release/
+*.suo
+*.user
+*.atsuo
+
+# Proteus
+*.DBK
+*.PWI
+*.SDF
+*.pdsprj.RESCUE-BAKS
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*~
