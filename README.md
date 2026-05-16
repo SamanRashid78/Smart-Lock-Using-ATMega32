@@ -63,23 +63,9 @@ Circuit was designed and validated in **Proteus Design Suite**. Refer to the pro
 ```
 smart-lock-atmega32/
 ├── src/
-│   └── main.asm          # Full firmware source
+│   └── main.asm          
 ├── docs/
-│   └── lab_14_proj_report.pdf
+│   └── Project Report.docx
 ├── .gitignore
 └── README.md
 ```
-
-## Known Limitations
-
-- Password is hardcoded and not changeable at runtime
-- No lockout after repeated wrong attempts
-- Servo control uses software delay loops rather than hardware PWM
-- No EEPROM persistence
-
-## Future Enhancements
-
-- EEPROM-based runtime password change
-- RFID or fingerprint authentication
-- Buzzer alarm after N failed attempts
-- GSM/Wi-Fi remote monitoring
