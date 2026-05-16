@@ -2,8 +2,6 @@
 
 Password-based digital door lock built in AVR Assembly on ATmega32. Features 4×4 keypad input, 16×2 LCD feedback, and servo motor actuation. Validated in Proteus and implemented on hardware.
 
----
-
 ## How It Works
 
 The user enters a 3-digit password via a 4×4 matrix keypad. Each keypress is echoed to a 16×2 LCD. Once 3 digits are entered, the firmware compares them against the hardcoded password. A correct match rotates a servo motor to unlock the door and displays "Door Unlocked". A wrong entry displays "Door Locked" and resets.
