@@ -1,33 +1,7 @@
-; ================================================================
 ;   SMART LOCK SYSTEM - ATmega32 (AVR Assembly)
-;   National University of Computer & Emerging Sciences, Karachi
-;   Department of Electrical Engineering
-;
-;   Course  : Microprocessor Programming and Interfacing EL-3002
-;   Instructor: Engr. Zohaib
-;
-;   Authors : Muzna Kamal (23K-6002), Eshaal Ali, Saman Rashid
-;
-;   Description:
-;     Password-based digital door lock using a 4x4 matrix keypad,
-;     16x2 LCD, and SG90 servo motor. Correct 3-digit password
-;     ('A','C','D') rotates the servo to unlock; wrong password
-;     displays "Door Locked" and resets.
-;
-;   Pin Map:
-;     PORTA (KEY_PORT/KEY_DDR/KEY_PIN) <- 4x4 Matrix Keypad
-;     PORTD (LCD_DPRT/LCD_DDDR/LCD_DPIN) -> LCD Data Bus (D0-D7)
-;     PORTB (LCD_CPRT/LCD_CDDR/LCD_CPIN) -> LCD Control (RS/RW/EN)
-;       PB0 = LCD_RS, PB1 = LCD_RW, PB2 = LCD_EN
-;     PORTC bit 0 (SERVO_PIN) -> Servo Signal
-;
-;   Password: 'A', 'C', 'D'  (hardcoded, 3 digits)
-;   Clock   : assumed 8 MHz (adjust delay loops if different)
-; ================================================================
-
 .include "m32def.inc"
 
-; -------------------- LCD PIN DEFINITIONS --------------------
+; LCD PIN DEFINITIONS 
 .EQU LCD_DPRT = PORTD       ; LCD DATA PORT
 .EQU LCD_DDDR = DDRD        ; LCD DATA DDR
 .EQU LCD_DPIN = PIND        ; LCD DATA PIN
@@ -40,40 +14,36 @@
 .EQU LCD_RW   = 1           ; LCD RW  -> PB1
 .EQU LCD_EN   = 2           ; LCD EN  -> PB2
 
-; -------------------- KEYPAD DEFINITIONS --------------------
+; KEYPAD DEFINITIONS 
 .EQU KEY_PORT = PORTA
 .EQU KEY_PIN  = PINA
 .EQU KEY_DDR  = DDRA
 
-; -------------------- SERVO DEFINITION --------------------
+; SERVO DEFINITION 
 .EQU SERVO_PIN = 0          ; Servo on Port C Bit 0
 
-; -------------------- RAM VARIABLES --------------------
+; RAM VARIABLES 
 .DSEG
 INPUT_BUF: .BYTE 4          ; Reserve 4 bytes for user input
 
-; ================================================================
 ; RESET VECTOR
-; ================================================================
 .CSEG
 .ORG 0x0000
     RJMP MAIN
 
-; ================================================================
 ; MAIN - Initialization
-; ================================================================
 MAIN:
-    ; --- 1. STACK SETUP ---
+    ; 1. STACK SETUP 
     LDI R21, HIGH(RAMEND)
     OUT SPH, R21
     LDI R21, LOW(RAMEND)
     OUT SPL, R21
 
-    ; --- 2. SERVO INIT (PORTC) ---
+    ; 2. SERVO INIT (PORTC) 
     SBI DDRC, SERVO_PIN     ; Set PC0 as Output
     CBI PORTC, SERVO_PIN
 
-    ; --- 3. LCD INITIALIZATION ---
+    ; 3. LCD INITIALIZATION 
     LDI R21, 0xFF
     OUT LCD_DDDR, R21
     OUT LCD_CDDR, R21
@@ -90,13 +60,11 @@ MAIN:
     LDI R16, 0x06           ; entry mode: increment, no shift
     CALL CMNDWRT
 
-    ; --- 4. KEYPAD INITIALIZATION ---
+    ; 4. KEYPAD INITIALIZATION 
     LDI R20, 0x0F
     OUT KEY_DDR, R20        ; upper nibble = output (rows), lower = input (cols)
 
-; ================================================================
 ; SYSTEM_RESET - Re-entry point after wrong/correct attempt
-; ================================================================
 SYSTEM_RESET:
     ; Reset Input Index Counter (R22)
     LDI R22, 0
@@ -114,9 +82,7 @@ SYSTEM_RESET:
     LDI R16, 0xC0
     CALL CMNDWRT
 
-; ================================================================
 ; KEYPAD SCAN LOOP
-; ================================================================
 GROUND_ALL_ROWS:
     LDI R20, 0xF0
     OUT KEY_PORT, R20
@@ -142,7 +108,7 @@ WAIT_FOR_KEY:
     CPI R21, 0xF0
     BREQ WAIT_FOR_KEY
 
-    ; --- SCAN ROW 0 (PA0) ---
+    ; SCAN ROW 0 (PA0) 
     LDI R21, 0b11111110
     OUT KEY_PORT, R21
     NOP
@@ -151,7 +117,7 @@ WAIT_FOR_KEY:
     CPI R21, 0xF0
     BRNE ROW_0_FOUND
 
-    ; --- SCAN ROW 1 (PA1) ---
+    ; SCAN ROW 1 (PA1) 
     LDI R21, 0b11111101
     OUT KEY_PORT, R21
     NOP
@@ -160,7 +126,7 @@ WAIT_FOR_KEY:
     CPI R21, 0xF0
     BRNE ROW_1_FOUND
 
-    ; --- SCAN ROW 2 (PA2) ---
+    ; SCAN ROW 2 (PA2) 
     LDI R21, 0b11111011
     OUT KEY_PORT, R21
     NOP
@@ -169,7 +135,7 @@ WAIT_FOR_KEY:
     CPI R21, 0xF0
     BRNE ROW_2_FOUND
 
-    ; --- SCAN ROW 3 (PA3) ---
+    ; SCAN ROW 3 (PA3) 
     LDI R21, 0b11110111
     OUT KEY_PORT, R21
     NOP
@@ -180,9 +146,7 @@ WAIT_FOR_KEY:
 
     RJMP GROUND_ALL_ROWS    ; No key found, retry
 
-; ================================================================
 ; ROW HANDLERS - Load Z pointer to correct keycode table
-; ================================================================
 ROW_0_FOUND:
     LDI R30, LOW(KCODE0<<1)
     LDI R31, HIGH(KCODE0<<1)
@@ -203,9 +167,7 @@ ROW_3_FOUND:
     LDI R31, HIGH(KCODE3<<1)
     RJMP FIND_PREP
 
-; ================================================================
 ; FIND COLUMN LOOP - Shift column bits to identify pressed key
-; ================================================================
 FIND_PREP:
     SWAP R21                ; Move column nibble to lower nibble
 
@@ -215,9 +177,7 @@ FIND:
     LPM R20, Z+             ; Skip this entry, advance table pointer
     RJMP FIND
 
-; ================================================================
 ; MATCH - Key identified; display and store it
-; ================================================================
 MATCH:
     LPM R16, Z              ; Load key character from table
     CALL DATAWRT            ; Display character on LCD
@@ -235,9 +195,7 @@ MATCH:
 
     RJMP GROUND_ALL_ROWS    ; Else, get next key
 
-; ================================================================
-; CHECK_PASS - Compare entered digits against hardcoded password
-; ================================================================
+; CHECK_PASS: we use it to compare entered digits against hardcoded password
 CHECK_PASS:
     CALL DELAY_2ms
 
@@ -262,9 +220,7 @@ CHECK_PASS:
 
     RJMP OPEN_DOOR
 
-; ================================================================
-; WRONG_CODE - Display "Door Locked" and reset
-; ================================================================
+; WRONG_CODE: Display "Door Locked" and reset
 WRONG_CODE:
     LDI R16, 0x01           ; Clear LCD
     CALL CMNDWRT
@@ -277,9 +233,7 @@ WRONG_CODE:
     CALL DELAY_LONG         ; Wait so user can see message
     RJMP SYSTEM_RESET
 
-; ================================================================
-; OPEN_DOOR - Display unlock messages and rotate servo
-; ================================================================
+; OPEN_DOOR: Display unlock messages and rotate servo
 OPEN_DOOR:
     LDI R16, 0x01           ; Clear LCD
     CALL CMNDWRT
@@ -296,8 +250,7 @@ OPEN_DOOR:
     LDI ZH, HIGH(MSG_OPENING*2)
     CALL SEND_STRING
 
-    ; --- ROTATE SERVO (90 Degrees) ---
-    ; Send 2ms pulse (High) + 18ms (Low), approx 50 times (~1 second)
+    ; ROTATE SERVO (90 Degrees) 
     LDI R23, 50             ; Repeat 50 times (~1 second)
 
 SERVO_LOOP:
@@ -309,7 +262,7 @@ SERVO_LOOP:
     DEC R23
     BRNE SERVO_LOOP
 
-    ; --- SHOW DOOR UNLOCKED ---
+    ; SHOW DOOR UNLOCKED 
     LDI R16, 0x01           ; Clear LCD
     CALL CMNDWRT
     CALL DELAY_2ms
@@ -320,9 +273,7 @@ SERVO_LOOP:
 
 STOP: RJMP STOP             ; Halt (door stays unlocked)
 
-; ================================================================
 ; LCD SUBROUTINES
-; ================================================================
 CMNDWRT:
     OUT LCD_DPRT, R16
     CBI LCD_CPRT, LCD_RS
@@ -352,9 +303,7 @@ SEND_STRING:
 STR_END:
     RET
 
-; ================================================================
 ; DELAY SUBROUTINES
-; ================================================================
 SDELAY:
     NOP
     NOP
@@ -411,9 +360,7 @@ W_LOOP:
     POP R17
     RET
 
-; ================================================================
-; LOOKUP TABLES - HARDWARE SPECIFIC
-; ================================================================
+; LOOKUP TABLES (HARDWARE SPECIFIC)
 .ORG 0x300
 
 KCODE0: .DB '1','2','3','A'
@@ -421,9 +368,7 @@ KCODE1: .DB '4','5','6','B'
 KCODE2: .DB '7','8','9','C'
 KCODE3: .DB '*','0','#','D'
 
-; ----------------------------------------------------------------
 ; String constants (null-terminated)
-; ----------------------------------------------------------------
 MSG_ENTER:    .DB "Enter Password:", 0
 MSG_WRONG:    .DB "Door Locked", 0
 MSG_CORRECT:  .DB "WELCOME", 0
